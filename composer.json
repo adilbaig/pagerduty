@@ -1,0 +1,8 @@
+{
+    "name": "adilbaig/pagerduty",
+    "autoload": {
+        "psr-0": {
+            "PagerDuty": "src"
+        }
+    }
+}
