@@ -1,7 +1,7 @@
 {
     "name": "adilbaig/pagerduty",
     "description": "PHP wrapper to PagerDuty Integration API.",
-    "keywords": ["pagerduty", "PagerDuty", "rest"],
+    "keywords": ["pagerduty", "rest"],
     "homepage": "https://github.com/adilbaig/pagerduty",
     "authors": [
         {
