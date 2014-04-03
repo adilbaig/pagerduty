@@ -9,7 +9,7 @@ Add this line to your project's `composer.json`
 {
 ...
     "require": {
-        "adilbaig/pagerduty": "dev-master"
+        "adilbaig/pagerduty": "1.0.*"
     }
 ...
 }
