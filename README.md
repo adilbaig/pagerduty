@@ -15,17 +15,23 @@ Add this line to your project's `composer.json`
 }
 ````
 
+The packagist URL is https://packagist.org/packages/adilbaig/pagerduty
+
 Usage:
 ----
 ````
 use \PagerDuty\PagerDuty;
 
+// Initialize the PagerDuty object with your GUID
 $pagerDuty = new PagerDuty("my GUID");
+
+// Create a request. In this example, we're triggering a "Service is down" message.
 $request = $pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down");
 echo "Request : ", json_encode($request);
 
-$result = array();
-$responseCode = $pagerDuty->send($request, $result);
+//Send the request and read the response in $response
+$response = array();
+$responseCode = $pagerDuty->send($request, $response);
 
 echo "ResponseCode : ", $responseCode, " Response : ", json_encode($response);
 ````
