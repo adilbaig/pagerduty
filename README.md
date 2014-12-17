@@ -2,6 +2,8 @@ PHP PagerDuty Integration API
 =========
 This library provides a PHP class to trigger events using the [PagerDuty Integration API](http://developer.pagerduty.com/documentation/integration/events)
 
+[![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
+
 Installation :
 ----
 Add this line to your project's `composer.json`
