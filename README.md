@@ -45,3 +45,7 @@ This library needs the [curl pecl extension](https://php.net/curl).
 In Ubuntu, install it like so :
 
     sudo apt-get install php5-curl
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/adilbaig/pagerduty/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
