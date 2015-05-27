@@ -21,6 +21,22 @@ The packagist URL is https://packagist.org/packages/adilbaig/pagerduty
 
 Usage:
 ----
+Triggering an event is done as follows :
+ - Initialize the object
+ - Create a request
+ - Send it!
+
+ 
+````
+use \PagerDuty\PagerDuty;
+
+// In this example, we're triggering a "Service is down" message.
+$pagerDuty = new PagerDuty("my GUID");
+$pagerDuty->send($pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down"));
+````
+
+You can also log the request and response for debugging.
+
 ````
 use \PagerDuty\PagerDuty;
 
@@ -31,7 +47,13 @@ $pagerDuty = new PagerDuty("my GUID");
 $request = $pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down");
 echo "Request : ", json_encode($request);
 
-//Send the request and read the response in $response
+/*
+ * Send the request and read the response in $response.
+ * $pagerDuty->send - returns the response code
+ * 
+ * If the second argument is provided it is filled with the response as an assocative array.
+ * You can log this output. The second argument is OPTIONAL.
+ */
 $response = array();
 $responseCode = $pagerDuty->send($request, $response);
 
