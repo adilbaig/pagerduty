@@ -12,7 +12,7 @@ class ResolveEvent extends Event
 
     public function __construct($serviceKey, $incidentKey)
     {
-        parent::__construct($serviceKey, parent::TYPE_RESOLVE);
+        parent::__construct($serviceKey, 'resolve');
 
         $this->setIncidentKey($incidentKey);
     }

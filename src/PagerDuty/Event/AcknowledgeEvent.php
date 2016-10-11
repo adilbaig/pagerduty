@@ -12,7 +12,7 @@ class AcknowledgeEvent extends Event
 
     public function __construct($serviceKey, $incidentKey)
     {
-        parent::__construct($serviceKey, parent::TYPE_ACKNOWLEDGE);
+        parent::__construct($serviceKey, 'acknowledge');
 
         $this->setIncidentKey($incidentKey);
     }

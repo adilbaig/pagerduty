@@ -20,7 +20,7 @@ class TriggerEvent extends Event
      */
     public function __construct($serviceKey, $description)
     {
-        parent::__construct($serviceKey, parent::TYPE_TRIGGER);
+        parent::__construct($serviceKey, 'trigger');
         $this->setDescription($description);
     }
 

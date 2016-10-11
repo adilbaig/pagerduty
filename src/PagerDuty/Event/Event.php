@@ -10,10 +10,6 @@ namespace PagerDuty\Event;
 abstract class Event implements \ArrayAccess, \JsonSerializable
 {
 
-    const TYPE_TRIGGER = 'trigger';
-    const TYPE_ACKNOWLEDGE = 'acknowledge';
-    const TYPE_RESOLVE = 'resolve';
-
     protected $dict;
 
     /**

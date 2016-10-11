@@ -20,7 +20,7 @@ class PagerDuty
     /**
      * Quickfire a 'trigger' event
      * For full control of triggers, with many optional features, 
-     * create a TriggerEvent class and use $this->send($triggerEvent)l
+     * create a TriggerEvent class and use $this->send($triggerEvent)
      * 
      * @param string $serviceKey
      * @param string $description
