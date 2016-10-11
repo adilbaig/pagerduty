@@ -1,6 +1,6 @@
 <?php
 
-namespace PagerDuty\Event\Context;
+namespace PagerDuty\Context;
 
 /**
  * Link

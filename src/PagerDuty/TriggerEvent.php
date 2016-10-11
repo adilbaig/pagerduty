@@ -1,10 +1,10 @@
 <?php
 
-namespace PagerDuty\Event;
+namespace PagerDuty;
 
-use PagerDuty\Event\Context\Context;
-use PagerDuty\Event\Context\ImageContext;
-use PagerDuty\Event\Context\LinkContext;
+use PagerDuty\Context\Context;
+use PagerDuty\Context\ImageContext;
+use PagerDuty\Context\LinkContext;
 
 /**
  * A 'trigger' event

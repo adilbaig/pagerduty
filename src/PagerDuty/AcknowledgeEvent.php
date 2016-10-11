@@ -1,18 +1,18 @@
 <?php
 
-namespace PagerDuty\Event;
+namespace PagerDuty;
 
 /**
- * A 'resolve' Event
+ * An 'acknowledge' Event
  *
  * @author adil
  */
-class ResolveEvent extends Event
+class AcknowledgeEvent extends Event
 {
 
     public function __construct($serviceKey, $incidentKey)
     {
-        parent::__construct($serviceKey, 'resolve');
+        parent::__construct($serviceKey, 'acknowledge');
 
         $this->setIncidentKey($incidentKey);
     }

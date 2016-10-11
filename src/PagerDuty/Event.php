@@ -1,8 +1,6 @@
 <?php
 
-namespace PagerDuty\Event;
-
-use PagerDuty\PagerDutyException;
+namespace PagerDuty;
 
 /**
  * An abstract Event

@@ -1,10 +1,10 @@
 <?php
 
-use PagerDuty\Event\AcknowledgeEvent;
-use PagerDuty\Event\Context\ImageContext;
-use PagerDuty\Event\Context\LinkContext;
-use PagerDuty\Event\ResolveEvent;
-use PagerDuty\Event\TriggerEvent;
+use PagerDuty\AcknowledgeEvent;
+use PagerDuty\Context\ImageContext;
+use PagerDuty\Context\LinkContext;
+use PagerDuty\ResolveEvent;
+use PagerDuty\TriggerEvent;
 
 class PagerDutyTest extends PHPUnit_Framework_TestCase
 {
@@ -62,5 +62,16 @@ class PagerDutyTest extends PHPUnit_Framework_TestCase
         ];
 
         $this->assertEquals($expect, $event->toArray());
+    }
+
+    public function testTriggerHashEvent()
+    {
+        $serviceKey = "sv123";
+
+        $msg = "FAILURE for production/HTTP on machine srv01.acme.com";
+        $event = new TriggerEvent($serviceKey, $msg, true);
+
+        $expect = ['incident_key' => "md5-" . md5($msg)];
+        $this->assertArraySubset($expect, $event->toArray());
     }
 }
