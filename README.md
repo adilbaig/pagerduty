@@ -1,6 +1,10 @@
-PHP PagerDuty Integration API
+PHP PagerDuty Events API
 =========
-This library provides a PHP class to trigger events using the [PagerDuty Integration API](http://developer.pagerduty.com/documentation/integration/events)
+PHP implementation of the [PagerDuty Events API](https://v2.developer.pagerduty.com/v2/docs/events-api)
+
+**Important**: v2 is a complete rewrite of the library. It is not backwards compatible with v1.
+
+For all new projects i suggest using v2. It is more flexible and easier to use than v1, and overcomes some of its predecessor's design limitations.
 
 [![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
 
@@ -11,7 +15,7 @@ Add this line to your project's `composer.json`
 {
 ...
     "require": {
-        "adilbaig/pagerduty": "1.0.*"
+        "adilbaig/pagerduty": "2.*"
     }
 ...
 }
@@ -21,44 +25,85 @@ The packagist URL is https://packagist.org/packages/adilbaig/pagerduty
 
 Usage:
 ----
-Triggering an event is done as follows :
- - Initialize the object
- - Create a request
- - Send it!
 
+Trigger an event
  
-````
-use \PagerDuty\PagerDuty;
+````php
+use \PagerDuty\TriggerEvent;
+use \PagerDuty\PagerDutyException;
+
+$serviceKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integration key of your service.
 
 // In this example, we're triggering a "Service is down" message.
-$pagerDuty = new PagerDuty("my GUID");
-$pagerDuty->send($pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down"));
+try {
+    $response = (new TriggerEvent($serviceKey, "Service is down"))->send();
+    if($response == 200)
+        echo "Success";
+    elseif($response == 403)
+        echo "Rate Limited";  //You're being throttled. Slow down.
+} catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
+    var_dump($exception->getErrors());
+}
+
 ````
 
-You can also log the request and response for debugging.
+Automatically send only one PagerDuty incident for repeated errors
+
+````php
+
+//After this example, you will see just one incident on PD
+
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
 
 ````
-use \PagerDuty\PagerDuty;
 
-// Initialize the PagerDuty object with your GUID
-$pagerDuty = new PagerDuty("my GUID");
+Create a detailed 'trigger' event, add optional data. Dump the event and inspect 
+response from PD
 
-// Create a request. In this example, we're triggering a "Service is down" message.
-$request = $pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down");
-echo "Request : ", json_encode($request);
+````php
+use \PagerDuty\TriggerEvent;
+use \PagerDuty\Context\LinkContext;
+use \PagerDuty\Context\ImageContext;
 
-/*
- * Send the request and read the response in $response.
- * $pagerDuty->send - returns the response code
- * 
- * If the second argument is provided it is filled with the response as an assocative array.
- * You can log this output. The second argument is OPTIONAL.
- */
-$response = array();
-$responseCode = $pagerDuty->send($request, $response);
+//Taken from the `trigger` example @ https://v2.developer.pagerduty.com/v2/docs/trigger-events
 
-echo "ResponseCode : ", $responseCode, " Response : ", json_encode($response);
+$event = new TriggerEvent($serviceKey, "FAILURE for production/HTTP on machine srv01.acme.com");
+$event
+    ->setClient("Sample Monitoring Service")
+    ->setClientURL("https://monitoring.service.com")
+    ->setDetails(["ping time": "1500ms", "load avg": 0.75])
+    ->addContext(new LinkContext("http://acme.pagerduty.com"))
+    ->addContext(new LinkContext("http://acme.pagerduty.com", "View the incident on PagerDuty"))
+    ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
+
+$response = null;
+$rez = event->send(&$response);
+var_dump($response);
 ````
+
+Acknowledge an event
+
+````php
+(new AcknowledgeEvent($serviceKey, "incident key"))->send();
+````
+
+Resolve an event
+
+````php
+(new ResolveEvent($serviceKey, "incident key"))->send();
+````
+
+Questions
+----
+
+**Q.** How do i get the service key from PagerDuty?
+
+**A.** In your PagerDuty console, click 'Configuration' > 'Services'. Click the link under 'Integrations' column. It's the 'Integration Key'
+
+Read more here : https://v2.developer.pagerduty.com/v2/docs/events-api#getting-started
 
 Requirements
 ----
@@ -67,7 +112,4 @@ This library needs the [curl pecl extension](https://php.net/curl).
 In Ubuntu, install it like so :
 
     sudo apt-get install php5-curl
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/adilbaig/pagerduty/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
