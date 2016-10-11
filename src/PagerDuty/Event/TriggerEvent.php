@@ -15,15 +15,28 @@ class TriggerEvent extends Event
 {
 
     /**
-     * ctor
+     *
+     * @var bool 
+     */
+    private $autoIncidentKey;
+
+    /**
+     * Ctor
+     * 
+     * When $autoIncidentKey is true it auto-generates an `incident_key` based on $description.
+     * The incident_key is an md5 hash of the $description. This prevents
+     * PagerDuty from flooding admins with incidents that are essentially the same.
      * 
      * @param string $serviceKey
      * @param string $description
+     * @param bool $autoIncidentKey (Opt) - Default: false
      */
-    public function __construct($serviceKey, $description)
+    public function __construct($serviceKey, $description, $autoIncidentKey = false)
     {
         parent::__construct($serviceKey, 'trigger');
         $this->setDescription($description);
+
+        $this->autoIncidentKey = (bool) $autoIncidentKey;
     }
 
     /**
@@ -97,10 +110,16 @@ class TriggerEvent extends Event
 
     public function toArray()
     {
+        if ($this->autoIncidentKey) {
+            $this->setIncidentKey("md5-" . md5($this->dict['description']));
+        }
+
         $ret = $this->dict;
 
-        foreach ($ret['contexts'] as $k => $v) {
-            $ret['contexts'][$k] = $v->toArray();
+        if (array_key_exists('contexts', $ret)) {
+            foreach ($ret['contexts'] as $k => $v) {
+                $ret['contexts'][$k] = $v->toArray();
+            }
         }
 
         return $ret;
