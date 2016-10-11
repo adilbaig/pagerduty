@@ -12,7 +12,7 @@ class ImageContext extends Context
 
     public function __construct($src, $href = null, $text = null)
     {
-        parent::__construct("link");
+        parent::__construct("image");
         $this->dict['src'] = (string) $src;
         
         if (!empty($href)) {
