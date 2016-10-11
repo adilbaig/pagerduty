@@ -74,4 +74,13 @@ class PagerDutyTest extends PHPUnit_Framework_TestCase
         $expect = ['incident_key' => "md5-" . md5($msg)];
         $this->assertArraySubset($expect, $event->toArray());
     }
+
+    /**
+     * @expectedException TypeError
+     */
+    public function testTypeError()
+    {
+        $event = new TriggerEvent("sv123", "Blah");
+        $event->setDetails(null);
+    }
 }
