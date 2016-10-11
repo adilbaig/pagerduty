@@ -45,9 +45,8 @@ elseif($response == 403)
 
 Automatically send only one PagerDuty incident for repeated errors
 
-````
+````php
 use \PagerDuty\PagerDuty;
-
 
 //After this example, you will see just one incident on PD
 
@@ -62,7 +61,7 @@ $pd->triggerSingleIncident($serviceKey, "Service is down");
 Create a detailed 'trigger' event, add optional data. Dump the event and inspect 
 response from PD
 
-````
+````php
 use \PagerDuty\PagerDuty;
 use \PagerDuty\Event\TriggerEvent;
 use \PagerDuty\Event\Context\LinkContext;
@@ -86,13 +85,13 @@ var_dump($response);
 
 Acknowledge an event
 
-````
+````php
 (new PagerDuty())->acknowledge($serviceKey, "incident key");
 ````
 
 Resolve an event
 
-````
+````php
 (new PagerDuty())->resolve($serviceKey, "incident key");
 ````
 
@@ -111,4 +110,5 @@ This library needs the [curl pecl extension](https://php.net/curl).
 
 In Ubuntu, install it like so :
 
-    sudo apt-get install php5-cur
+    sudo apt-get install php5-curl
+
