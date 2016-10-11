@@ -4,7 +4,7 @@ PHP implementation of the [PagerDuty Events API](https://v2.developer.pagerduty.
 
 **Important**: v2 is a complete rewrite of the library. It is not backwards compatible with v1.
 
-For all new projects i suggest using v2. It is more flexible and easier to use than v1, and overcomes some of it's predecessor's design limitations.
+For all new projects i suggest using v2. It is more flexible and easier to use than v1, and overcomes some of its predecessor's design limitations.
 
 [![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
 
