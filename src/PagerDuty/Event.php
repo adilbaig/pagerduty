@@ -16,7 +16,7 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
      * ctor
      * 
      * @param string $serviceKey
-     * @param string $type - One of self::TYPE_*
+     * @param string $type - One of trigger, acknowledge or resolve
      */
     protected function __construct($serviceKey, $type)
     {
