@@ -2,7 +2,7 @@ PHP PagerDuty Events API
 =========
 PHP implementation of the [PagerDuty Events API](https://v2.developer.pagerduty.com/v2/docs/events-api)
 
-v2 is a complete rewrite of the library. It is not backwards compatible with v1.
+**Important**: v2 is a complete rewrite of the library. It is not backwards compatible with v1.
 
 For all new projects i suggest using v2. It is more flexible and easier to use than v1, and overcomes some of it's predecessor's design limitations.
 
@@ -28,7 +28,7 @@ Usage:
 
 Trigger an event
  
-````
+````php
 use \PagerDuty\PagerDuty;
 
 $serviceKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integration key of your service.
@@ -99,8 +99,9 @@ Resolve an event
 Questions
 ----
 
-Q. How do i get the service key from PagerDuty?
-A. In your PagerDuty console, click 'Configuration' > 'Services'. Click the link under 'Integrations' column. It's the 'Integration Key'
+**Q.** How do i get the service key from PagerDuty?
+
+**A.** In your PagerDuty console, click 'Configuration' > 'Services'. Click the link under 'Integrations' column. It's the 'Integration Key'
 
 Read more here : https://v2.developer.pagerduty.com/v2/docs/events-api#getting-started
 
@@ -110,8 +111,4 @@ This library needs the [curl pecl extension](https://php.net/curl).
 
 In Ubuntu, install it like so :
 
-    sudo apt-get install php5-curl
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/adilbaig/pagerduty/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+    sudo apt-get install php5-cur
