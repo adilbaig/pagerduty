@@ -94,4 +94,15 @@ class TriggerEvent extends Event
         $this->dict['contexts'][] = $context;
         return $this;
     }
+
+    public function toArray()
+    {
+        $ret = $this->dict;
+
+        foreach ($ret['contexts'] as $k => $v) {
+            $ret['contexts'][$k] = $v->toArray();
+        }
+
+        return $ret;
+    }
 }
