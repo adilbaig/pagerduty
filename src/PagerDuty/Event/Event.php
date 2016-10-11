@@ -2,6 +2,8 @@
 
 namespace PagerDuty\Event;
 
+use PagerDuty\PagerDutyException;
+
 /**
  * An abstract Event
  * 
@@ -82,6 +84,43 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     {
         return $this->dict;
     }
+
+    /**
+     * Send the event to PagerDuty
+     * 
+     * @param array $result (Opt)(Pass by reference) - If this parameter is given the result of the CURL call will be filled here. The response is an associative array.
+     * 
+     * @throws PagerDutyException - If status code == 400
+     * 
+     * @return int - HTTP response code
+     *  200 - Event Processed
+     *  400 - Invalid Event. Throws a PagerDutyException
+     *  403 - Rate Limited. Slow down and try again later.
+     */
+    public function send(&$result = null)
+    {
+        $jsonStr = json_encode($this);
+
+        $curl = curl_init("https://events.pagerduty.com/generic/2010-04-15/create_event.json");
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonStr);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($jsonStr)
+        ));
+
+        $result = json_decode(curl_exec($curl), true);
+
+        $responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        if ($responseCode == 400) {
+            throw new PagerDutyException($result['message'], $result['errors']);
+        }
+
+        return $responseCode;
+    }
     /* -------- ArrayAccess -------- */
 
     public function offsetExists($key)
@@ -101,7 +140,7 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     public function offsetSet($key, $value)
     {
         if (empty($key) || is_string($key)) {
-            throw new Exception("Key must be a non-empty string. It is `" . var_export($key, true) . "`");
+            throw new \Exception("Key must be a non-empty string. It is `" . var_export($key, true) . "`");
         }
 
         $this->dict[$key] = $value;
