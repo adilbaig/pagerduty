@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * cd into root
+ * ./vendor/bin/phpunit test
+ */
+
 use PagerDuty\AcknowledgeEvent;
 use PagerDuty\Context\ImageContext;
 use PagerDuty\Context\LinkContext;
