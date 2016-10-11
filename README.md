@@ -8,6 +8,14 @@ For all new projects i suggest using v2. It is more flexible and easier to use t
 
 [![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
 
+Features :
+----
+
+- Trigger, acknowledge and resolve incidents.
+- Support for [PD contexts](https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts). 
+- Unit Tests
+
+
 Installation :
 ----
 Add this line to your project's `composer.json`
