@@ -2,100 +2,101 @@
 
 namespace PagerDuty;
 
+use PagerDuty\Event\AcknowledgeEvent;
+use PagerDuty\Event\Event;
+use PagerDuty\Event\TriggerEvent;
+use PagerDuty\Event\ResolveEvent;
+
 /**
- * PagerDuty Integration API
- * Class to communicate with the PagerDuty Integration API REST service.
+ * PagerDuty Events API v2
+ * @link https://v2.developer.pagerduty.com/docs/events-api
  * 
- * http://developer.pagerduty.com/documentation/integration/events
+ * See examples in README.md
  * 
- * Usage:
- * 
- * $pagerDuty = new PagerDuty("my GUID");
- * $request = $pagerDuty->makeRequest(PagerDuty::TYPE_TRIGGER, "Service is down");
- * echo "Request : ", json_encode($request);
- * 
- * $result = array();
- * $responseCode = $pagerDuty->send($request, $result);
- * 
- * if ($responseCode > 204) { 
-  throw new \Exception("$result['status'] : $result['message']");
-  }
  */
 class PagerDuty
 {
 
-    const TYPE_TRIGGER = 'trigger';
-    const TYPE_ACKNOWLEDGE = 'acknowledge';
-    const TYPE_RESOLVE = 'resolve';
-
     /**
-     * The service key
+     * Quickfire a 'trigger' event
+     * For full control of triggers, with many optional features, 
+     * create a TriggerEvent class and use $this->send($triggerEvent)l
      * 
-     * @var string 
-     */
-    protected $serviceKey;
-
-    /**
-     * Ctor
+     * @param string $serviceKey
+     * @param string $description
+     * @param string $incidentKey (Opt) - Read more @link https://v2.developer.pagerduty.com/v2/docs/events-api#incident-de-duplication-and-incident_key
      * 
-     * @param string $serviceKey - The GUID of one of your "Generic API" services.
+     * @return int - HTTP status code. See send()
      */
-    public function __construct($serviceKey)
+    public function trigger($serviceKey, $description, $incidentKey = null)
     {
-        $this->serviceKey = $serviceKey;
+        $ev = new TriggerEvent($serviceKey, $description);
+
+        if (!empty($incidentKey)) {
+            $ev->setIncidentKey($incidentKey);
+        }
+
+        return $this->send($ev);
     }
 
     /**
-     * Make a JSON request.
-     * It returns an assoc. array that will be used as the JSON body of the CURL request.
+     * Same as $this->trigger() except auto-generates an `incident_key` based on $description
+     * the incident_key is the md5 hash of $description. This prevents
+     * PagerDuty from flooding admins with incidents that are essentially the same.
      * 
-     * @param string $type - One of self::TYPE_* constants
-     * @param string $desc - The 'description' for this event
-     * @param string $incidentKey (Opt) - The incident key. If it doesn't exist a new incident will be created
-     * @param array  $details (Opt) - An optional payload as key/value pairs. The 'details' parameter
-     * @param string $client (Opt) - The 'client' parameter
-     * @param string $clientUrl (Opt) - The 'client_url' parameter
+     * @param string $serviceKey
+     * @param string $description
      * 
-     * @return array - The JSON request.
+     * @return int - HTTP status code. See send()
      */
-    public function makeRequest($type, $desc, $incidentKey = null, array $details = null, $client = null, $clientUrl = null)
+    public function triggerSingleIncident($serviceKey, $description)
     {
-        $json = array(
-            "service_key" => $this->serviceKey,
-            "event_type" => $type,
-            "description" => $desc,
-        );
+        $ev = new TriggerEvent($serviceKey, $description);
+        $ev->setIncidentKey("md5-" . md5($description));
 
-        if (!empty($incidentKey)) {
-            $json['incident_key'] = $incidentKey;
-        }
+        $this->send($ev);
+    }
 
-        if (!empty($client)) {
-            $json['client'] = $client;
-        }
+    /**
+     * Acknowledge an event
+     * 
+     * @param string $serviceKey
+     * @param string $incidentKey
+     * 
+     * @return int - HTTP status code. See send()
+     */
+    public function acknowledge($serviceKey, $incidentKey)
+    {
+        return $this->send(new AcknowledgeEvent($serviceKey, $incidentKey));
+    }
 
-        if (!empty($clientUrl)) {
-            $json['client_url'] = $clientUrl;
-        }
-
-        if (!empty($details)) {
-            $json['details'] = $details;
-        }
-
-        return $json;
+    /**
+     * Resolve an event
+     * 
+     * @param string $serviceKey
+     * @param string $incidentKey
+     * 
+     * @return int - HTTP status code. See send()
+     */
+    public function resolve($serviceKey, $incidentKey)
+    {
+        return $this->send(new ResolveEvent($serviceKey, $incidentKey));
     }
 
     /**
      * Trigger an event 
      * 
-     * @param array $request - Use self::makeRequest to generate
+     * @param Event $event - A concrete Event object
      * @param array $result (Opt)(Pass by reference) - If this parameter is given the result of the CURL call will be filled here. The response is an associative array
      * 
      * @return int - HTTP response
+     *  200 - Event Processed
+     *  400 - Invalid Event. Check $result
+     *  403 - Rate Limited. Slow down and try again later.
      */
-    public function send(array $request, &$result = null)
+    public function send(Event $event, &$result = null)
     {
-        $jsonStr = json_encode($request);
+        $jsonStr = json_encode($event);
 
         $curl = curl_init("https://events.pagerduty.com/generic/2010-04-15/create_event.json");
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -113,5 +114,4 @@ class PagerDuty
 
         return $responseCode;
     }
-
 }
