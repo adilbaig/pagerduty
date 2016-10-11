@@ -3,6 +3,8 @@
 namespace PagerDuty\Event;
 
 use PagerDuty\Event\Context\Context;
+use PagerDuty\Event\Context\ImageContext;
+use PagerDuty\Event\Context\LinkContext;
 
 /**
  * A 'trigger' event
@@ -46,6 +48,33 @@ class TriggerEvent extends Event
     {
         $this->dict['client_url'] = (string) $clientUrl;
         return $this;
+    }
+
+    /**
+     * Add a Link context
+     * 
+     * @param string $href
+     * @param string $text (Opt)
+     * 
+     * @return self
+     */
+    public function addLink($href, $text = null)
+    {
+        return $this->addContext(new LinkContext($href, $text));
+    }
+
+    /**
+     * Add an Image context
+     * 
+     * @param string $src
+     * @param string $href (Opt)
+     * @param string $text (Opt)
+     * 
+     * @return self
+     */
+    public function addImage($src, $href = null, $text = null)
+    {
+        return $this->addContext(new ImageContext($src, $href, $text));
     }
 
     /**
