@@ -29,32 +29,34 @@ Usage:
 Trigger an event
  
 ````php
-use \PagerDuty\PagerDuty;
+use \PagerDuty\TriggerEvent;
+use \PagerDuty\PagerDutyException;
 
 $serviceKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integration key of your service.
 
 // In this example, we're triggering a "Service is down" message.
-$response = (new PagerDuty())->trigger($serviceKey, "Service is down");
-if($response == 200)
-    echo "Success";
-elseif($response == 400)
-    echo "Invalid Event"; //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
-elseif($response == 403)
-    echo "Rate Limited";  //You're being throttled. Slow down.
+try {
+    $response = (new TriggerEvent($serviceKey, "Service is down"))->send();
+    if($response == 200)
+        echo "Success";
+    elseif($response == 403)
+        echo "Rate Limited";  //You're being throttled. Slow down.
+} catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
+    var_dump($exception->getErrors());
+}
+
 ````
 
 Automatically send only one PagerDuty incident for repeated errors
 
 ````php
-use \PagerDuty\PagerDuty;
 
 //After this example, you will see just one incident on PD
 
-$pd = new PagerDuty();
-$pd->triggerSingleIncident($serviceKey, "Service is down");
-$pd->triggerSingleIncident($serviceKey, "Service is down");
-$pd->triggerSingleIncident($serviceKey, "Service is down");
-$pd->triggerSingleIncident($serviceKey, "Service is down");
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
+(new TriggerEvent($serviceKey, "Service is down", true))->send();
 
 ````
 
@@ -62,10 +64,9 @@ Create a detailed 'trigger' event, add optional data. Dump the event and inspect
 response from PD
 
 ````php
-use \PagerDuty\PagerDuty;
-use \PagerDuty\Event\TriggerEvent;
-use \PagerDuty\Event\Context\LinkContext;
-use \PagerDuty\Event\Context\ImageContext;
+use \PagerDuty\TriggerEvent;
+use \PagerDuty\Context\LinkContext;
+use \PagerDuty\Context\ImageContext;
 
 //Taken from the `trigger` example @ https://v2.developer.pagerduty.com/v2/docs/trigger-events
 
@@ -79,20 +80,20 @@ $event
     ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
 
 $response = null;
-$rez = (new PagerDuty())->send($event, &$response);
+$rez = event->send(&$response);
 var_dump($response);
 ````
 
 Acknowledge an event
 
 ````php
-(new PagerDuty())->acknowledge($serviceKey, "incident key");
+(new AcknowledgeEvent($serviceKey, "incident key"))->send();
 ````
 
 Resolve an event
 
 ````php
-(new PagerDuty())->resolve($serviceKey, "incident key");
+(new ResolveEvent($serviceKey, "incident key"))->send();
 ````
 
 Questions
