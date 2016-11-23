@@ -88,7 +88,7 @@ $event
     ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
 
 $response = null;
-$rez = event->send(&$response);
+$rez = $event->send($response);
 var_dump($response);
 ````
 
