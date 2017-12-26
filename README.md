@@ -12,7 +12,8 @@ Features :
 ----
 
 - Trigger, acknowledge and resolve incidents.
-- Support for [PD contexts](https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts). 
+- Support for [Event contexts](https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts). 
+- Works with [V2 of the PD Events API](https://v2.developer.pagerduty.com/v2/docs/#the-events-api).
 - Unit Tests
 
 
@@ -44,10 +45,10 @@ $serviceKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integratio
 
 // In this example, we're triggering a "Service is down" message.
 try {
-    $response = (new TriggerEvent($serviceKey, "Service is down"))->send();
-    if($response == 200)
+    $responseCode = (new TriggerEvent($serviceKey, "Service is down"))->send();
+    if($responseCode == 200)
         echo "Success";
-    elseif($response == 403)
+    elseif($responseCode == 403)
         echo "Rate Limited";  //You're being throttled. Slow down.
 } catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
     var_dump($exception->getErrors());
@@ -87,8 +88,9 @@ $event
     ->addContext(new LinkContext("http://acme.pagerduty.com", "View the incident on PagerDuty"))
     ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
 
+// Pass in the '$response' variable by reference if you want to inspect PD's response. This is optional, and you probably don't need this in production.
 $response = null;
-$rez = $event->send($response);
+$responseCode = $event->send($response);
 var_dump($response);
 ````
 
@@ -117,7 +119,7 @@ Requirements
 ----
 This library needs the [curl pecl extension](https://php.net/curl).
 
-In Ubuntu, install it like so :
+In Ubuntu 16.04, install it like so :
 
-    sudo apt-get install php5-curl
+    sudo apt install php-curl
 
