@@ -3,7 +3,7 @@
     "description": "PHP wrapper to PagerDuty Events API.",
     "keywords": ["pagerduty", "rest"],
     "homepage": "https://github.com/adilbaig/pagerduty",
-    "license": "BSD",
+    "license": "MIT",
     "authors": [{
         "name": "Adil Baig",
         "homepage": "https://github.com/adilbaig"
