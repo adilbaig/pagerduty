@@ -4,7 +4,7 @@ namespace PagerDuty;
 
 /**
  * An abstract Event
- * 
+ * @link https://v2.developer.pagerduty.com/v2/docs/trigger-events
  * @author adil
  */
 abstract class Event implements \ArrayAccess, \JsonSerializable
@@ -14,111 +14,66 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
 
     /**
      * ctor
-     * 
+     *
      * @param string $serviceKey
-     * @param string $type - One of trigger, acknowledge or resolve
+     * @param string $eventType - One of 'trigger', 'acknowledge' or 'resolve'
      */
-    protected function __construct($serviceKey, $type)
+    protected function __construct(string $serviceKey, string $eventType)
     {
-        $this->dict['service_key'] = (string) $serviceKey;
-        $this->dict['event_type'] = (string) $type;
-    }
-
-    /**
-     * A human-readable error message. 
-     * This is what PD will read over the phone.
-     * 
-     * @param string $desc
-     * 
-     * @return self
-     */
-    public function setDescription($desc)
-    {
-        $this->dict['description'] = (string) $desc;
-        return $this;
-    }
-
-    /**
-     * An associative array of any user-defined values.
-     * This will be displayed along with the error in PD. Useful for debugging.
-     * 
-     * @param array $details - An associative array
-     * 
-     * @return self
-     */
-    public function setDetails(array $details)
-    {
-        $this->dict['details'] = $details;
-        return $this;
+        $this->dict['service_key'] = $serviceKey;
+        $this->dict['event_type'] = $eventType;
     }
 
     /**
      * A unique incident key to identify an outage.
+     * For 'trigger' events this is optional. If not provided, PagerDuty will generate one and return it in the response.
      * Multiple events with the same $incidentKey will be grouped into one open incident. From the PD docs :
-     * 
-     * `Submitting subsequent events for the same incident_key will result in those events being applied to an open incident 
-     * matching that incident_key. Once the incident is resolved, any further events with the same incident_key will 
+     *
+     * `Submitting subsequent events for the same incident_key will result in those events being applied to an open incident
+     * matching that incident_key. Once the incident is resolved, any further events with the same incident_key will
      * create a new incident (for trigger events) or be dropped (for acknowledge and resolve events).`
-     * 
-     * @link https://v2.developer.pagerduty.com/docs/events-api#incident-de-duplication-and-incident_key 
-     * 
+     *
+     * @link https://v2.developer.pagerduty.com/v2/docs/trigger-events
+     * @link https://v2.developer.pagerduty.com/docs/events-api#incident-de-duplication-and-incident_key
+     *
      * @param string $incidentKey
-     * 
+     *
      * @return self
      */
-    public function setIncidentKey($incidentKey)
+    public function setIncidentKey(string $incidentKey): self
     {
-        $this->dict['incident_key'] = (string) $incidentKey;
+        $this->dict['incident_key'] = $incidentKey;
         return $this;
     }
 
     /**
      * Get the array
      * Useful for debugging or logging.
-     * 
+     *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->dict;
     }
 
     /**
      * Send the event to PagerDuty
-     * 
+     *
      * @param array $result (Opt)(Pass by reference) - If this parameter is given the result of the CURL call will be filled here. The response is an associative array.
-     * 
+     *
      * @throws PagerDutyException - If status code == 400
-     * 
+     *
      * @return int - HTTP response code
      *  200 - Event Processed
      *  400 - Invalid Event. Throws a PagerDutyException
      *  403 - Rate Limited. Slow down and try again later.
      */
-    public function send(&$result = null)
+    public function send()
     {
-        $jsonStr = json_encode($this);
-
-        $curl = curl_init("https://events.pagerduty.com/generic/2010-04-15/create_event.json");
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonStr);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($jsonStr)
-        ));
-
-        $result = json_decode(curl_exec($curl), true);
-
-        $responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-
-        if ($responseCode == 400) {
-            throw new PagerDutyException($result['message'], $result['errors']);
-        }
-
-        return $responseCode;
+        return sendEvent($this);
     }
+
     /* -------- ArrayAccess -------- */
 
     public function offsetExists($key)
@@ -152,8 +107,47 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     }
     /* -------- JsonSerializable -------- */
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }
+}
+
+/**
+ * Send the event to PagerDuty
+ *
+ * @param Event $event - Send this event.
+ *
+ * @throws PagerDutyException - If status code == 400
+ *
+ * @return array - An associative array with the following params.
+ * 1. 'code' => HTTP response code
+ *  200 - Event Processed
+ *  400 - Invalid Event. Throws a PagerDutyException
+ *  403 - Rate Limited. Slow down and try again later.
+ * 2. Any other fields as returned by PagerDuty
+ */
+function sendEvent(Event $event): array
+{
+    $jsonStr = json_encode($event);
+
+    $curl = curl_init("https://events.pagerduty.com/generic/2010-04-15/create_event.json");
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonStr);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($jsonStr),
+    ));
+
+    // See response types: https://v2.developer.pagerduty.com/v2/docs/trigger-events
+    $result = json_decode(curl_exec($curl), true);
+    if (empty($result)) {
+        $result = [];
+    }
+
+    $result['code'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+
+    return $result;
 }

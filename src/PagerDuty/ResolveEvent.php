@@ -10,7 +10,7 @@ namespace PagerDuty;
 class ResolveEvent extends Event
 {
 
-    public function __construct($serviceKey, $incidentKey)
+    public function __construct(string $serviceKey, string $incidentKey)
     {
         parent::__construct($serviceKey, 'resolve');
 

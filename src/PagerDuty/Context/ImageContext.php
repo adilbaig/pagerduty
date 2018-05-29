@@ -10,17 +10,17 @@ namespace PagerDuty\Context;
 class ImageContext extends Context
 {
 
-    public function __construct($src, $href = null, $text = null)
+    public function __construct(string $src, string $href = null, string $text = null)
     {
         parent::__construct("image");
-        $this->dict['src'] = (string) $src;
+        $this->dict['src'] = $src;
         
         if (!empty($href)) {
-            $this->dict['href'] = (string) $href;
+            $this->dict['href'] = $href;
         }
 
         if (!empty($text)) {
-            $this->dict['text'] = (string) $text;
+            $this->dict['text'] = $text;
         }
     }
 }

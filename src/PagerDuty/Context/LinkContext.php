@@ -10,13 +10,13 @@ namespace PagerDuty\Context;
 class LinkContext extends Context
 {
 
-    public function __construct($href, $text = null)
+    public function __construct(string $href, string $text = null)
     {
         parent::__construct("link");
-        $this->dict['href'] = (string) $href;
+        $this->dict['href'] = $href;
 
         if (!empty($text)) {
-            $this->dict['text'] = (string) $text;
+            $this->dict['text'] = $text;
         }
     }
 }

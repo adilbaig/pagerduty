@@ -45,7 +45,8 @@ $serviceKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integratio
 
 // In this example, we're triggering a "Service is down" message.
 try {
-    $responseCode = (new TriggerEvent($serviceKey, "Service is down"))->send();
+    $event = new TriggerEvent($serviceKey, "Service is down");
+    $responseCode = $event->send();
     if($responseCode == 200)
         echo "Success";
     elseif($responseCode == 403)
@@ -62,7 +63,6 @@ Automatically send only one PagerDuty incident for repeated errors
 
 //After this example, you will see just one incident on PD
 
-(new TriggerEvent($serviceKey, "Service is down", true))->send();
 (new TriggerEvent($serviceKey, "Service is down", true))->send();
 (new TriggerEvent($serviceKey, "Service is down", true))->send();
 (new TriggerEvent($serviceKey, "Service is down", true))->send();
@@ -83,10 +83,10 @@ $event = new TriggerEvent($serviceKey, "FAILURE for production/HTTP on machine s
 $event
     ->setClient("Sample Monitoring Service")
     ->setClientURL("https://monitoring.service.com")
-    ->setDetails(["ping time": "1500ms", "load avg": 0.75])
+    ->setDetails(["ping time" => "1500ms", "load avg" => 0.75])
     ->addContext(new LinkContext("http://acme.pagerduty.com"))
     ->addContext(new LinkContext("http://acme.pagerduty.com", "View the incident on PagerDuty"))
-    ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
+    ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"));
 
 // Pass in the '$response' variable by reference if you want to inspect PD's response. This is optional, and you probably don't need this in production.
 $response = null;
