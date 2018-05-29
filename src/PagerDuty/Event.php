@@ -60,16 +60,18 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     /**
      * Send the event to PagerDuty
      *
-     * @param array $result (Opt)(Pass by reference) - If this parameter is given the result of the CURL call will be filled here. The response is an associative array.
+     * @param Event $event - Send this event.
      *
      * @throws PagerDutyException - If status code == 400
      *
-     * @return int - HTTP response code
-     *  200 - Event Processed
-     *  400 - Invalid Event. Throws a PagerDutyException
-     *  403 - Rate Limited. Slow down and try again later.
+     * @return array - An associative array with the following params.
+     *  1. 'code' => HTTP response code
+     *      200 - Event Processed
+     *      400 - Invalid Event. Throws a PagerDutyException
+     *      403 - Rate Limited. Slow down and try again later.
+     *  2. Any other fields as returned by PagerDuty
      */
-    public function send()
+    public function send(): array
     {
         return sendEvent($this);
     }
@@ -113,20 +115,6 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     }
 }
 
-/**
- * Send the event to PagerDuty
- *
- * @param Event $event - Send this event.
- *
- * @throws PagerDutyException - If status code == 400
- *
- * @return array - An associative array with the following params.
- * 1. 'code' => HTTP response code
- *  200 - Event Processed
- *  400 - Invalid Event. Throws a PagerDutyException
- *  403 - Rate Limited. Slow down and try again later.
- * 2. Any other fields as returned by PagerDuty
- */
 function sendEvent(Event $event): array
 {
     $jsonStr = json_encode($event);
