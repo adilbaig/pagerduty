@@ -11,7 +11,7 @@ use PagerDuty\Context\LinkContext;
 use PagerDuty\ResolveEvent;
 use PagerDuty\TriggerEvent;
 
-class PagerDutyTest extends PHPUnit_Framework_TestCase
+class PagerDutyTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testAckEvent()
