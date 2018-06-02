@@ -16,17 +16,17 @@ class TriggerEvent extends Event
 
     /**
      *
-     * @var bool 
+     * @var bool
      */
     private $autoIncidentKey;
 
     /**
      * Ctor
-     * 
+     *
      * When $autoIncidentKey is true it auto-generates an `incident_key` based on $description.
      * The incident_key is an md5 hash of the $description. This prevents
      * PagerDuty from flooding admins with incidents that are essentially the same.
-     * 
+     *
      * @param string $serviceKey
      * @param string $description
      * @param bool $autoIncidentKey (Opt) - Default: false
@@ -41,7 +41,7 @@ class TriggerEvent extends Event
 
     /**
      * The name of the monitoring client that is triggering this event
-     * 
+     *
      * @param string $client
      * @return self
      */
@@ -53,7 +53,7 @@ class TriggerEvent extends Event
 
     /**
      * The URL of the monitoring client that is triggering this event.
-     * 
+     *
      * @param string $clientUrl
      * @return self
      */
@@ -64,11 +64,39 @@ class TriggerEvent extends Event
     }
 
     /**
+     * A human-readable error message.
+     * This is what PD will read over the phone.
+     *
+     * @param string $desc
+     *
+     * @return self
+     */
+    public function setDescription($desc)
+    {
+        $this->dict['description'] = (string) $desc;
+        return $this;
+    }
+
+    /**
+     * An associative array of any user-defined values.
+     * This will be displayed along with the error in PD. Useful for debugging.
+     *
+     * @param array $details - An associative array
+     *
+     * @return self
+     */
+    public function setDetails(array $details)
+    {
+        $this->dict['details'] = $details;
+        return $this;
+    }
+
+    /**
      * Add a Link context
-     * 
+     *
      * @param string $href
      * @param string $text (Opt)
-     * 
+     *
      * @return self
      */
     public function addLink($href, $text = null)
@@ -78,11 +106,11 @@ class TriggerEvent extends Event
 
     /**
      * Add an Image context
-     * 
+     *
      * @param string $src
      * @param string $href (Opt)
      * @param string $text (Opt)
-     * 
+     *
      * @return self
      */
     public function addImage($src, $href = null, $text = null)
@@ -92,9 +120,9 @@ class TriggerEvent extends Event
 
     /**
      * A context is an additional asset that can be attached to an incident.
-     * 
+     *
      * @link https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts
-     * 
+     *
      * @param Context $context
      * @return self
      */

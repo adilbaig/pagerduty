@@ -25,34 +25,6 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     }
 
     /**
-     * A human-readable error message. 
-     * This is what PD will read over the phone.
-     * 
-     * @param string $desc
-     * 
-     * @return self
-     */
-    public function setDescription($desc)
-    {
-        $this->dict['description'] = (string) $desc;
-        return $this;
-    }
-
-    /**
-     * An associative array of any user-defined values.
-     * This will be displayed along with the error in PD. Useful for debugging.
-     * 
-     * @param array $details - An associative array
-     * 
-     * @return self
-     */
-    public function setDetails(array $details)
-    {
-        $this->dict['details'] = $details;
-        return $this;
-    }
-
-    /**
      * A unique incident key to identify an outage.
      * Multiple events with the same $incidentKey will be grouped into one open incident. From the PD docs :
      * 
