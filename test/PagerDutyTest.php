@@ -16,53 +16,62 @@ class PagerDutyTest extends \PHPUnit\Framework\TestCase
 
     public function testAckEvent()
     {
-        $serviceKey = "sv123";
-        $incidentKey = "inc123";
+        $routingKey = 'sv123';
+        $dedupKey = 'inc123';
 
-        $event = new AcknowledgeEvent($serviceKey, $incidentKey);
+        $event = new AcknowledgeEvent($routingKey, $dedupKey);
 
-        $expect = ['service_key' => $serviceKey, 'incident_key' => $incidentKey, 'event_type' => 'acknowledge'];
+        $expect = ['routing_key' => $routingKey, 'dedup_key' => $dedupKey, 'event_action' => 'acknowledge'];
         $this->assertEquals($expect, $event->toArray());
     }
 
     public function testResolveEvent()
     {
-        $serviceKey = "sv123";
-        $incidentKey = "inc123";
+        $routingKey = 'sv123';
+        $dedupKey = 'inc123';
 
-        $event = new ResolveEvent($serviceKey, $incidentKey);
+        $event = new ResolveEvent($routingKey, $dedupKey);
 
-        $expect = ['service_key' => $serviceKey, 'incident_key' => $incidentKey, 'event_type' => 'resolve'];
+        $expect = ['routing_key' => $routingKey, 'dedup_key' => $dedupKey, 'event_action' => 'resolve'];
         $this->assertEquals($expect, $event->toArray());
     }
 
     public function testTriggerEvent()
     {
-        $serviceKey = "sv123";
+        $routingKey = 'sv123';
 
-        $event = new TriggerEvent($serviceKey, "FAILURE for production/HTTP on machine srv01.acme.com");
+        $event = new TriggerEvent($routingKey, 'FAILURE for production/HTTP on machine srv01.acme.com', 'localhost', TriggerEvent::ERROR);
         $event
-            ->setClient("Sample Monitoring Service")
-            ->setClientURL("https://monitoring.service.com")
-            ->setDetails(["ping time" => "1500ms", "load avg" => 0.75])
-            ->addContext(new LinkContext("http://acme.pagerduty.com"))
-            ->addContext(new LinkContext("http://acme.pagerduty.com", "View the incident on PagerDuty"))
-            ->addContext(new ImageContext("https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"))
+            ->setPayloadClass('ping failure')
+            ->setPayloadComponent('web server')
+            ->setPayloadTimestamp('2018-05-01T08:42:58.315+0000')
+            ->setPayloadCustomDetails(['ping_time' => '1500ms', 'load_avg' => 0.75])
+            ->addContext(new LinkContext('http://acme.pagerduty.com'))
+            ->addContext(new LinkContext('http://acme.pagerduty.com', 'View the incident on PagerDuty'))
+            ->addContext(new ImageContext('https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1'))
         ;
 
-        $this->assertArrayNotHasKey('incident_key', $event->toArray());
+        $this->assertArrayNotHasKey('dedup_key', $event->toArray());
 
         $expect = [
-            'service_key' => $serviceKey,
-            'event_type' => 'trigger',
-            'description' => "FAILURE for production/HTTP on machine srv01.acme.com",
-            'details' => ["ping time" => "1500ms", "load avg" => 0.75],
-            'client' => "Sample Monitoring Service",
-            'client_url' => "https://monitoring.service.com",
+            'routing_key' => $routingKey,
+            'event_action' => 'trigger',
+            'payload' => [
+                'summary' => 'FAILURE for production/HTTP on machine srv01.acme.com',
+                'source' => 'localhost',
+                'severity' => 'error',
+                'class' => 'ping failure',
+                'component' => 'web server',
+                'timestamp' => '2018-05-01T08:42:58.315+0000',
+                'custom_details' => [
+                    'ping_time' => '1500ms',
+                    'load_avg' => 0.75,
+                ],
+            ],
             'contexts' => [
-                ['type' => 'link', 'href' => "http://acme.pagerduty.com"],
-                ['type' => 'link', 'href' => "http://acme.pagerduty.com", 'text' => "View the incident on PagerDuty"],
-                ['type' => 'image', 'src' => "https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1"],
+                ['type' => 'link', 'href' => 'http://acme.pagerduty.com'],
+                ['type' => 'link', 'href' => 'http://acme.pagerduty.com', 'text' => 'View the incident on PagerDuty'],
+                ['type' => 'image', 'src' => 'https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1'],
             ],
         ];
 
@@ -71,12 +80,12 @@ class PagerDutyTest extends \PHPUnit\Framework\TestCase
 
     public function testTriggerHashEvent()
     {
-        $serviceKey = "sv123";
+        $routingKey = 'sv123';
 
-        $msg = "FAILURE for production/HTTP on machine srv01.acme.com";
-        $event = new TriggerEvent($serviceKey, $msg, true);
+        $msg = 'FAILURE for production/HTTP on machine srv01.acme.com';
+        $event = new TriggerEvent($routingKey, $msg, 'localhost', TriggerEvent::ERROR, true);
 
-        $expect = ['incident_key' => "md5-" . md5($msg)];
+        $expect = ['dedup_key' => 'md5-' . md5($msg)];
         $this->assertArraySubset($expect, $event->toArray());
     }
 
@@ -85,7 +94,7 @@ class PagerDutyTest extends \PHPUnit\Framework\TestCase
      */
     public function testTypeError()
     {
-        $event = new TriggerEvent("sv123", "Blah");
+        $event = new TriggerEvent('sv123', 'Blah');
         $event->setDetails(null);
     }
 }

@@ -4,7 +4,7 @@ namespace PagerDuty;
 
 /**
  * An abstract Event
- * 
+ *
  * @author adil
  */
 abstract class Event implements \ArrayAccess, \JsonSerializable
@@ -14,40 +14,40 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
 
     /**
      * ctor
-     * 
-     * @param string $serviceKey
-     * @param string $type - One of trigger, acknowledge or resolve
+     *
+     * @param string $routingKey
+     * @param string $type - One of 'trigger', 'acknowledge' or 'resolve'
      */
-    protected function __construct($serviceKey, $type)
+    protected function __construct($routingKey, $type)
     {
-        $this->dict['service_key'] = (string) $serviceKey;
-        $this->dict['event_type'] = (string) $type;
+        $this->dict['routing_key'] = (string) $routingKey;
+        $this->dict['event_action'] = (string) $type;
     }
 
     /**
-     * A unique incident key to identify an outage.
-     * Multiple events with the same $incidentKey will be grouped into one open incident. From the PD docs :
-     * 
-     * `Submitting subsequent events for the same incident_key will result in those events being applied to an open incident 
-     * matching that incident_key. Once the incident is resolved, any further events with the same incident_key will 
-     * create a new incident (for trigger events) or be dropped (for acknowledge and resolve events).`
-     * 
-     * @link https://v2.developer.pagerduty.com/docs/events-api#incident-de-duplication-and-incident_key 
-     * 
-     * @param string $incidentKey
-     * 
+     * A unique key to identify an outage.
+     * Multiple events with the same $key will be grouped into one open incident. From the PD docs :
+     *
+     * `Submitting subsequent events for the same `dedup_key` will result in those events being applied to an open alert
+     * matching that `dedup_key`. Once the alert is resolved, any further events with the same `dedup_key` will create a
+     * new alert (for `trigger` events) or be dropped (for `acknowledge` and `resolve` events).`
+     *
+     * @link https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication
+     *
+     * @param string $key
+     *
      * @return self
      */
-    public function setIncidentKey($incidentKey)
+    public function setDeDupKey($key)
     {
-        $this->dict['incident_key'] = (string) $incidentKey;
+        $this->dict['dedup_key'] = substr((string) $key, 0, 255);
         return $this;
     }
 
     /**
-     * Get the array
+     * Get the request json as an array
      * Useful for debugging or logging.
-     * 
+     *
      * @return array
      */
     public function toArray()
@@ -57,13 +57,13 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
 
     /**
      * Send the event to PagerDuty
-     * 
+     *
      * @param array $result (Opt)(Pass by reference) - If this parameter is given the result of the CURL call will be filled here. The response is an associative array.
-     * 
+     *
      * @throws PagerDutyException - If status code == 400
-     * 
+     *
      * @return int - HTTP response code
-     *  200 - Event Processed
+     *  202 - Event Processed
      *  400 - Invalid Event. Throws a PagerDutyException
      *  403 - Rate Limited. Slow down and try again later.
      */
@@ -71,13 +71,13 @@ abstract class Event implements \ArrayAccess, \JsonSerializable
     {
         $jsonStr = json_encode($this);
 
-        $curl = curl_init("https://events.pagerduty.com/generic/2010-04-15/create_event.json");
+        $curl = curl_init("https://events.pagerduty.com/v2/enqueue");
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonStr);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($jsonStr)
+            'Content-Length: ' . strlen($jsonStr),
         ));
 
         $result = json_decode(curl_exec($curl), true);

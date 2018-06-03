@@ -10,10 +10,10 @@ namespace PagerDuty;
 class AcknowledgeEvent extends Event
 {
 
-    public function __construct($serviceKey, $incidentKey)
+    public function __construct($routingKey, $dedupKey)
     {
-        parent::__construct($serviceKey, 'acknowledge');
+        parent::__construct($routingKey, 'acknowledge');
 
-        $this->setIncidentKey($incidentKey);
+        $this->setDeDupKey($dedupKey);
     }
 }
