@@ -3,9 +3,9 @@ PHP PagerDuty Events API
 PHP implementation of the [PagerDuty Events API V2](https://v2.developer.pagerduty.com/docs/events-api-v2)
 
 
-UPGRADE NOTICE:
+UPGRADE NOTICE
 ---
-The [Events API V2]((https://v2.developer.pagerduty.com/docs/events-api-v2)) is **not backwards compatible** with the [Events API V1](https://v2.developer.pagerduty.com/docs/events-api). Hence, this API has changed. If you are upgrading from a [2.* release](https://github.com/adilbaig/pagerduty/releases), make sure you pay attention to the contructor of the `TriggerEvent`
+The [Events API V2](https://v2.developer.pagerduty.com/docs/events-api-v2) is **not backwards compatible** with the [Events API V1](https://v2.developer.pagerduty.com/docs/events-api). Hence, this API has changed. If you are upgrading from a [2.* release](https://github.com/adilbaig/pagerduty/releases), make sure you pay attention to the contructor of the `TriggerEvent`
 
 [![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
 
@@ -105,19 +105,20 @@ var_dump($response['dedup_key']);
 ````
 
 Acknowledge an event
+----
 
 ````php
 (new AcknowledgeEvent($routingKey, "dedup key"))->send();
 ````
 
 Resolve an event
-
+----
 ````php
 (new ResolveEvent($routingKey, "dedup key"))->send();
 ````
 
 Questions
-----
+---
 
 **Q.** How do i get the service key from PagerDuty?
 
@@ -126,7 +127,7 @@ Questions
 Read more here : https://v2.developer.pagerduty.com/v2/docs/events-api#getting-started
 
 Requirements
-----
+---
 This library needs the [curl pecl extension](https://php.net/curl).
 
 In Ubuntu 16.04, install it like so :
