@@ -46,7 +46,13 @@ $routingKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integratio
 
 // In this example, we're triggering a "Service is down" message from a web server.
 try {
-    $event = new TriggerEvent($routingKey, "Service is down", "web-server-01", TriggerEvent::ERROR, true);
+    $event = new TriggerEvent(
+        $routingKey, 
+        "Service is down",  // A high-level, text summary message of the event. Will be used to construct an alert's description.
+        "web-server-01",    // human-readable unique identifier, such as a hostname, for the system having the problem.
+        TriggerEvent::ERROR,// How impacted the affected system is? Influences the priority of any created incidents. 
+        true                // Generate the dedup_key from the driver. If false, the dedup_key will be generated on PD 
+    );
     $responseCode = $event->send();
     if($responseCode == 200)
         echo "Success";
@@ -145,4 +151,9 @@ This library needs the [curl pecl extension](https://php.net/curl).
 In Ubuntu 16.04, install it like so :
 
     sudo apt install php-curl
+
+
+In Ubuntu 18.04, install it like so :
+
+    sudo apt install php7.2-curl
 
