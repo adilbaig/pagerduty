@@ -8,86 +8,138 @@ use PagerDuty\Context\LinkContext;
 
 /**
  * A 'trigger' event
+ * @link https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2
  *
  * @author adil
  */
 class TriggerEvent extends Event
 {
 
+    const CRITICAL = 'critical';
+    const ERROR = 'error';
+    const WARNING = 'warning';
+    const INFO = 'info';
+
     /**
      *
      * @var bool
      */
-    private $autoIncidentKey;
+    private $autoDeDupKey;
 
     /**
      * Ctor
      *
-     * When $autoIncidentKey is true it auto-generates an `incident_key` based on $description.
-     * The incident_key is an md5 hash of the $description. This prevents
-     * PagerDuty from flooding admins with incidents that are essentially the same.
-     *
-     * @param string $serviceKey
-     * @param string $description
-     * @param bool $autoIncidentKey (Opt) - Default: false
+     * @param string $routingKey - The routing key, taken from your PagerDuty 'Configuration' > 'Services' page
+     * @param string $summary - The Error message
+     * @param string $source - The unique location of the affected system, preferably a hostname or FQDN.
+     * @param string $severity - One of 'critical', 'error', 'warning' or 'info'. Use the constants above
+     * @param boolean $autoDeDupKey - If true, autogenerates a `dedup_key` based on the md5 hash of the $summary
      */
-    public function __construct($serviceKey, $description, $autoIncidentKey = false)
+    public function __construct($routingKey, $summary, $source, $severity, $autoDeDupKey = false)
     {
-        parent::__construct($serviceKey, 'trigger');
-        $this->setDescription($description);
+        parent::__construct($routingKey, 'trigger');
+        $this->setPayloadSummary($summary);
+        $this->setPayloadSource($source);
+        $this->setPayloadSeverity($severity);
 
-        $this->autoIncidentKey = (bool) $autoIncidentKey;
-    }
-
-    /**
-     * The name of the monitoring client that is triggering this event
-     *
-     * @param string $client
-     * @return self
-     */
-    public function setClient($client)
-    {
-        $this->dict['client'] = (string) $client;
-        return $this;
-    }
-
-    /**
-     * The URL of the monitoring client that is triggering this event.
-     *
-     * @param string $clientUrl
-     * @return self
-     */
-    public function setClientURL($clientUrl)
-    {
-        $this->dict['client_url'] = (string) $clientUrl;
-        return $this;
+        $this->autoDeDupKey = (bool) $autoDeDupKey;
     }
 
     /**
      * A human-readable error message.
      * This is what PD will read over the phone.
      *
-     * @param string $desc
+     * @param string $summary
      *
      * @return self
      */
-    public function setDescription($desc)
+    public function setPayloadSummary($summary)
     {
-        $this->dict['description'] = (string) $desc;
+        $this->dict['payload']['summary'] = (string) $summary;
         return $this;
     }
 
     /**
-     * An associative array of any user-defined values.
-     * This will be displayed along with the error in PD. Useful for debugging.
+     * The unique location of the affected system, preferably a hostname or FQDN.
      *
-     * @param array $details - An associative array
-     *
+     * @param string $source
      * @return self
      */
-    public function setDetails(array $details)
+    public function setPayloadSource($source)
     {
-        $this->dict['details'] = $details;
+        $this->dict['payload']['source'] = (string) $source;
+        return $this;
+    }
+
+    /**
+     * One of critical, error, warning or info. Use the class constants above
+     *
+     * @param string $value
+     * @return self
+     */
+    public function setPayloadSeverity($value)
+    {
+        $this->dict['payload']['severity'] = (string) $value;
+        return $this;
+    }
+
+    /**
+     * The time this error occured.
+     *
+     * @param string $timestamp - Can be a datetime string as well. See the example @ https://v2.developer.pagerduty.com/docs/send-an-event-events-api-v2
+     * @return self
+     */
+    public function setPayloadTimestamp($timestamp)
+    {
+        $this->dict['payload']['timestamp'] = (string) $timestamp;
+        return $this;
+    }
+
+    /**
+     * From the PD docs: "Component of the source machine that is responsible for the event, for example `mysql` or `eth0`"
+     *
+     * @param string $value
+     * @return self
+     */
+    public function setPayloadComponent($value)
+    {
+        $this->dict['payload']['component'] = (string) $value;
+        return $this;
+    }
+
+    /**
+     * From the PD docs: "Logical grouping of components of a service, for example `app-stack`"
+     *
+     * @param string $value
+     * @return self
+     */
+    public function setPayloadGroup($value)
+    {
+        $this->dict['payload']['group'] = (string) $value;
+        return $this;
+    }
+
+    /**
+     * From the PD docs: "The class/type of the event, for example `ping failure` or `cpu load`"
+     *
+     * @param string $value
+     * @return self
+     */
+    public function setPayloadClass($value)
+    {
+        $this->dict['payload']['class'] = (string) $value;
+        return $this;
+    }
+
+    /**
+     * An associative array of additional details about the event and affected system
+     *
+     * @param array $dict
+     * @return self
+     */
+    public function setPayloadCustomDetails(array $dict)
+    {
+        $this->dict['payload']['custom_details'] = $dict;
         return $this;
     }
 
@@ -138,8 +190,8 @@ class TriggerEvent extends Event
 
     public function toArray()
     {
-        if ($this->autoIncidentKey) {
-            $this->setIncidentKey("md5-" . md5($this->dict['description']));
+        if ($this->autoDeDupKey) {
+            $this->setDeDupKey("md5-" . md5($this->dict['payload']['summary']));
         }
 
         $ret = $this->dict;
