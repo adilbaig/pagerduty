@@ -117,6 +117,18 @@ Resolve an event
 (new ResolveEvent($routingKey, "dedup key"))->send();
 ````
 
+UnitTests
+---
+
+````bash
+> ./vendor/bin/phpunit test/
+.....                                                               5 / 5 (100%)
+
+Time: 37 ms, Memory: 4.00MB
+
+OK (5 tests, 6 assertions)
+````
+
 Questions
 ---
 
