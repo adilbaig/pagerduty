@@ -2,6 +2,8 @@
 
 namespace PagerDuty;
 
+use PagerDuty\Exceptions\PagerDutyException;
+
 /**
  * An abstract Event
  *

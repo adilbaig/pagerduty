@@ -40,7 +40,7 @@ Trigger an event
  
 ````php
 use \PagerDuty\TriggerEvent;
-use \PagerDuty\PagerDutyException;
+use \PagerDuty\Exceptions\PagerDutyException;
 
 $routingKey = "1d334a4819fc4b67a795b1c54f9a"; //Replace this with the integration key of your service.
 
@@ -62,6 +62,49 @@ try {
         echo "Some error has occured. Try again later";
 } catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
     var_dump($exception->getErrors());
+}
+
+````
+
+Trigger event with custom connection, for example: using proxies and/or setting verbosity for debugging, etc.
+
+````php
+
+use \PagerDuty\TriggerEvent;
+use \PagerDuty\Exceptions\PagerDutyException;
+use \PagerDuty\Http\PagerDutyHttpConnection;
+
+try {
+    $routingKey = '1d334a4819fc4b67a795b1c54f9a';  //Replace this with the integration key of your service.
+
+    $event = new TriggerEvent(
+        $routingKey, 
+        "Service is down",  // A high-level, text summary message of the event. Will be used to construct an alert's description.
+        "web-server-01",    // human-readable unique identifier, such as a hostname, for the system having the problem.
+        TriggerEvent::ERROR,// How impacted the affected system is? Influences the priority of any created incidents. 
+        true                // Generate the dedup_key from the driver. If false, the dedup_key will be generated on PD 
+    );
+
+    // create a custom connection
+    $connection = new PagerDutyHttpConnection();
+
+    // set additional connection configuration
+
+    // send event through proxy
+    $connection->setProxy('https://user:password@your-proxy-ip-address:port');
+
+    // set verbosity for debugging
+    $connection->addCurlOption('CURLOPT_VERBOSE', 1);
+    
+    // send event
+    $connection->send($event);
+}
+catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
+    var_dump($exception->getErrors());
+}
+catch (\Exception $e) {
+
+    // failed
 }
 
 ````
