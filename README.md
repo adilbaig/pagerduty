@@ -5,7 +5,7 @@ PHP implementation of the [PagerDuty Events API V2](https://v2.developer.pagerdu
 
 UPGRADE NOTICE
 ---
-The [Events API V2](https://v2.developer.pagerduty.com/docs/events-api-v2) is **not backwards compatible** with the [Events API V1](https://v2.developer.pagerduty.com/docs/events-api). Hence, this API has changed. If you are upgrading from a [2.* release](https://github.com/adilbaig/pagerduty/releases), make sure you pay attention to the contructor of the `TriggerEvent`
+The [PagerDuty Events API V2](https://v2.developer.pagerduty.com/docs/events-api-v2) is **not backwards compatible** with the [PagerDuty Events API V1](https://v2.developer.pagerduty.com/docs/events-api). Hence, this API has changed. If you are upgrading from a [2.* release](https://github.com/adilbaig/pagerduty/releases), make sure you pay attention to the contructor of the `TriggerEvent`
 
 [![Latest Stable Version](https://poser.pugx.org/adilbaig/pagerduty/v/stable.svg)](https://packagist.org/packages/adilbaig/pagerduty) [![Total Downloads](https://poser.pugx.org/adilbaig/pagerduty/downloads.svg)](https://packagist.org/packages/adilbaig/pagerduty) 
 
@@ -85,26 +85,23 @@ try {
         true                // Generate the dedup_key from the driver. If false, the dedup_key will be generated on PD 
     );
 
-    // create a custom connection
+    // create a custom proxy connection
     $connection = new PagerDutyHttpConnection();
 
-    // set additional connection configuration
-
-    // send event through proxy
+    // .. and set the proxy
     $connection->setProxy('https://user:password@your-proxy-ip-address:port');
 
-    // set verbosity for debugging
+    // set custom CURL options. Here we set verbosity for debugging
     $connection->addCurlOption('CURLOPT_VERBOSE', 1);
     
-    // send event
+    // send event through proxy
     $connection->send($event);
 }
 catch(PagerDutyException $exception) { //This doesn't happen unless you've broken their guidelines. The API tries to minimize user mistakes
     var_dump($exception->getErrors());
 }
 catch (\Exception $e) {
-
-    // failed
+    // A configuration exception
 }
 
 ````
