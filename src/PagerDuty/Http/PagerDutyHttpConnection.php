@@ -345,7 +345,7 @@ class PagerDutyHttpConnection
         }
 
         $url = $this->getUrl();
-        $this->addHeader('Content-Type', \strlen($payload));
+        $this->addHeader('Content-Length', \strlen($payload));
 
         $curl = curl_init($url);
 
