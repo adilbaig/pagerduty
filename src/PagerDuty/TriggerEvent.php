@@ -197,8 +197,19 @@ class TriggerEvent extends Event
         $ret = $this->dict;
 
         if (array_key_exists('contexts', $ret)) {
-            foreach ($ret['contexts'] as $k => $v) {
-                $ret['contexts'][$k] = $v->toArray();
+            /** @var Context $context */
+            foreach ($ret['contexts'] as $context) {
+                if ($context instanceof LinkContext) {
+                    $top_level_key = 'links';
+                } else if ($context instanceof ImageContext) {
+                    $top_level_key = 'images';
+                } else {
+                    continue;
+                }
+                if (!array_key_exists($top_level_key, $ret)) {
+                    $ret[$top_level_key] = [];
+                }
+                $ret[$top_level_key][] = $context->toArray();
             }
         }
 
