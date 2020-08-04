@@ -6,8 +6,6 @@
  */
 
 use PagerDuty\AcknowledgeEvent;
-use PagerDuty\Context\ImageContext;
-use PagerDuty\Context\LinkContext;
 use PagerDuty\ResolveEvent;
 use PagerDuty\TriggerEvent;
 
@@ -46,9 +44,11 @@ class PagerDutyTest extends \PHPUnit\Framework\TestCase
             ->setPayloadComponent('web server')
             ->setPayloadTimestamp('2018-05-01T08:42:58.315+0000')
             ->setPayloadCustomDetails(['ping_time' => '1500ms', 'load_avg' => 0.75])
-            ->addContext(new LinkContext('http://acme.pagerduty.com'))
-            ->addContext(new LinkContext('http://acme.pagerduty.com', 'View the incident on PagerDuty'))
-            ->addContext(new ImageContext('https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1'))
+            ->addLink('http://acme.pagerduty.com')
+            ->addLink('http://acme.pagerduty.com', 'View the incident on PagerDuty')
+            ->addImage('https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1')
+            ->addImage('https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,2', 'http://acme.pagerduty.com/href')
+            ->addImage('https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,3', 'http://acme.pagerduty.com/href', 'Zig Zag')
         ;
 
         $this->assertArrayNotHasKey('dedup_key', $event->toArray());
@@ -68,11 +68,15 @@ class PagerDutyTest extends \PHPUnit\Framework\TestCase
                     'load_avg' => 0.75,
                 ],
             ],
-            'contexts' => [
-                ['type' => 'link', 'href' => 'http://acme.pagerduty.com'],
-                ['type' => 'link', 'href' => 'http://acme.pagerduty.com', 'text' => 'View the incident on PagerDuty'],
-                ['type' => 'image', 'src' => 'https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1'],
+            'links' => [
+                ['href' => 'http://acme.pagerduty.com'],
+                ['href' => 'http://acme.pagerduty.com', 'text' => 'View the incident on PagerDuty']
             ],
+            'images' => [
+                ['src' => 'https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,1'],
+                ['src' => 'https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,2', 'href' => 'http://acme.pagerduty.com/href'],
+                ['src' => 'https://chart.googleapis.com/chart?chs=600x400&chd=t:6,2,9,5,2,5,7,4,8,2,1&cht=lc&chds=a&chxt=y&chm=D,0033FF,0,0,5,3', 'href' => 'http://acme.pagerduty.com/href', 'alt' => 'Zig Zag'],
+            ]
         ];
 
         $this->assertEquals($expect, $event->toArray());
