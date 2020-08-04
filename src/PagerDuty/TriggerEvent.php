@@ -2,13 +2,9 @@
 
 namespace PagerDuty;
 
-use PagerDuty\Context\Context;
-use PagerDuty\Context\ImageContext;
-use PagerDuty\Context\LinkContext;
-
 /**
  * A 'trigger' event
- * @link https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2
+ * @link https://developer.pagerduty.com/docs/events-api-v2/trigger-events/
  *
  * @author adil
  */
@@ -144,47 +140,56 @@ class TriggerEvent extends Event
     }
 
     /**
-     * Add a Link context
+     * Attach a link to the incident.
      *
-     * @param string $href
-     * @param string $text (Opt)
+     * @link https://developer.pagerduty.com/docs/events-api-v2/trigger-events/#the-links-property
+     *
+     * @param string $href URL of the link to be attached.
+     * @param string $text Optional. Plain text that describes the purpose of the link, and can be used as the link's text.
      *
      * @return self
      */
     public function addLink($href, $text = null)
     {
-        return $this->addContext(new LinkContext($href, $text));
-    }
-
-    /**
-     * Add an Image context
-     *
-     * @param string $src
-     * @param string $href (Opt)
-     * @param string $text (Opt)
-     *
-     * @return self
-     */
-    public function addImage($src, $href = null, $text = null)
-    {
-        return $this->addContext(new ImageContext($src, $href, $text));
-    }
-
-    /**
-     * A context is an additional asset that can be attached to an incident.
-     *
-     * @link https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts
-     *
-     * @param Context $context
-     * @return self
-     */
-    public function addContext(Context $context)
-    {
-        if (!array_key_exists('contexts', $this->dict)) {
-            $this->dict['contexts'] = [];
+        if (!array_key_exists('links', $this->dict)) {
+            $this->dict['links'] = [];
         }
 
-        $this->dict['contexts'][] = $context;
+        $link = ['href' => (string) $href];
+        if (!empty($text)) {
+            $link['text'] = (string) $text;
+        }
+        $this->dict['links'][] = $link;
+
+        return $this;
+    }
+
+    /**
+     * Attach an image to the incident.
+     *
+     * @link https://developer.pagerduty.com/docs/events-api-v2/trigger-events/#the-images-property
+     *
+     * @param string $src The source (URL) of the image being attached to the incident. This image must be served via HTTPS.
+     * @param string $href Optional URL; makes the image a clickable link.
+     * @param string $alt Optional alternative text for the image.
+     *
+     * @return self
+     */
+    public function addImage($src, $href = null, $alt = null)
+    {
+        if (!array_key_exists('images', $this->dict)) {
+            $this->dict['images'] = [];
+        }
+
+        $image = ['src' => (string) $src];
+        if (!empty($href)) {
+            $image['href'] = (string) $href;
+        }
+        if (!empty($alt)) {
+            $image['alt'] = (string) $alt;
+        }
+        $this->dict['images'][] = $image;
+
         return $this;
     }
 
@@ -193,15 +198,6 @@ class TriggerEvent extends Event
         if ($this->autoDeDupKey) {
             $this->setDeDupKey("md5-" . md5($this->dict['payload']['summary']));
         }
-
-        $ret = $this->dict;
-
-        if (array_key_exists('contexts', $ret)) {
-            foreach ($ret['contexts'] as $k => $v) {
-                $ret['contexts'][$k] = $v->toArray();
-            }
-        }
-
-        return $ret;
+        return $this->dict;
     }
 }

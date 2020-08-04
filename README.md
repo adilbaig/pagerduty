@@ -121,8 +121,6 @@ Create a detailed 'trigger' event, add optional data. Dump the event and inspect
 
 ````php
 use \PagerDuty\TriggerEvent;
-use \PagerDuty\Context\LinkContext;
-use \PagerDuty\Context\ImageContext;
 
 //Taken from the `trigger` example @ https://v2.developer.pagerduty.com/docs/send-an-event-events-api-v2
 //Send a detailed event, and store the `dedup_key` generated on the server
@@ -139,8 +137,8 @@ $event
     ->setPayloadGroup("prod-datapipe")
     ->setPayloadClass("deploy")
     ->setPayloadCustomDetails(["ping_time" => "1500ms", "load_avg" => 0.75])
-    ->addContext(new LinkContext("https://example.com/", "Link text"))
-    ->addContext(new ImageContext("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png", "https://example.com/", "Example text"))
+    ->addLink("https://example.com/", "Link text")
+    ->addImage("https://www.pagerduty.com/wp-content/uploads/2016/05/pagerduty-logo-green.png", "https://example.com/", "Example text"))
 ;
 
 // Pass in the '$response' variable by reference if you want to inspect PD's response. This is optional, and you probably don't need this in production.
