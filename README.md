@@ -12,9 +12,9 @@ The [PagerDuty Events API V2](https://v2.developer.pagerduty.com/docs/events-api
 Features
 ---
 
-- Compatible with [PD Events API V2](https://v2.developer.pagerduty.com/v2/docs/#the-events-api).
-- Trigger, acknowledge and resolve incidents.
-- Supports [Event contexts](https://v2.developer.pagerduty.com/v2/docs/trigger-events#contexts). Attach links and images to your incident reports.
+- Compatible with [PagerDuty Events API V2](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
+- Trigger, Acknowledge and Resolve incidents.
+- Attach [Links](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/#the-links-property) and [Images](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/#the-images-property) to your incident reports.
 - Unit Tests
 
 
